@@ -37,6 +37,7 @@ class Draggable(QWidget):
         # 返回鼠标相对于窗口的坐标
         # print(event.x())
         # print(event.y())
+        print(event.glo)
         # print(self.geometry())
         # 返回相对于控件的当前鼠标位置.PyQt5.QtCore.QPoint(260, 173)
         # print(event.pos())
@@ -95,14 +96,14 @@ class Shadow(QWidget):
         self.setGraphicsEffect(self.shadow)
 
 
-class ImgModule(Draggable, Shadow, RightButtonChangeSize):
+class ImgModule(Draggable, RightButtonChangeSize):
     is_dragg = False
     _angle = 0
     size_change = False
 
     def __init__(self, img_path, size, blur_radius):
         self.blur_radius = blur_radius
-        super(ImgModule, self).__init__(blur_radius=self.blur_radius)
+        super(ImgModule, self).__init__()
         self.minimum = self.blur_radius + 40
         self.img_path = img_path
         self.size = size
@@ -153,6 +154,7 @@ class ImgModule(Draggable, Shadow, RightButtonChangeSize):
         # 抗锯齿
         painter.setRenderHint(QPainter.Antialiasing, True)
         # 设置平滑变换
+        painter.setRenderHint(QPainter.HighQualityAntialiasing, True)
         painter.setRenderHint(QPainter.SmoothPixmapTransform, True)
         painter.begin(self)
         self.paintCircle(painter)
@@ -171,15 +173,36 @@ class ImgModule(Draggable, Shadow, RightButtonChangeSize):
             pixmap = QPixmap(self.img_path)
         scaled = pixmap.scaled(self.geometry().size(), Qt.IgnoreAspectRatio, Qt.SmoothTransformation)
 
-        bruch = QBrush(scaled)
-        painter.setBrush(bruch)
+        # bruch = QBrush(scaled)
+        # painter.setBrush(bruch)
         # pen.setStyle(Qt.DashLine)
-        painter.setPen(pen)
+        # painter.setPen(pen)
         rect = QRect(penWidth // 2 + self.blur_radius // 2, penWidth // 2 + self.blur_radius // 2,
                      self.rect().width() - penWidth - self.blur_radius,
                      self.rect().height() - penWidth - self.blur_radius)
+
+        # painter.drawPixmap(scaled)
+
+        # 绘制
+        path = QPainterPath()
+        diameter = min(self.width(), self.height())
+        # if self.shape == self.Circle:
+        #     radius = int(diameter / 2)
+        # elif self.shape == self.Rectangle:
+        #     radius = 4
+        # radius = int(diameter / 2)
+        radius = 4
+        halfW = self.width() / 2
+        halfH = self.height() / 2
+        painter.translate(halfW, halfH)
+        path.addRoundedRect(
+            QRectF(-halfW, -halfH, diameter, diameter), radius, radius)
+        painter.setClipPath(path)
         painter.rotate(self._angle)
-        painter.drawRoundedRect(rect, rect.width() // 2, rect.height() // 2)
+        painter.drawPixmap(
+            QPointF(-scaled.width() / 2, -scaled.height() / 2), scaled)
+
+        # painter.drawRoundedRect(rect, rect.width() // 2, rect.height() // 2)
 
     def mousePressEvent(self, event):
         super(ImgModule, self).mousePressEvent(event)
@@ -206,5 +229,5 @@ if __name__ == '__main__':
     q_size = QSize(150, 150)
     app = QApplication(sys.argv)
     # http://api.btstu.cn/sjtx/api.php?lx=c3&format=images
-    module = ImgModule("images/bz.jpg", q_size, blur_radius=20)
+    module = ImgModule("imgs/wallhaven-28z3q9.jpg", q_size, blur_radius=20)
     sys.exit(app.exec_())
