@@ -63,6 +63,8 @@ class COP(QWidget):
         p.end()
 
 
+
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     cop = COP()
