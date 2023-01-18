@@ -163,8 +163,6 @@ class PetGui(Draggable, RightButtonChangeSize):
         q_label.setPixmap(QPixmap.fromImage(self.pet.clothes[0]))
         q_label.mousePressEvent.connect()
 
-
-
     def paintEvent(self, event):
         super(PetGui, self).paintEvent(event)
         q_painter = QPainter(self)
@@ -255,7 +253,7 @@ class PetSystem():
 
     def start(self):
         app = QApplication(sys.argv)
-        pet = RickPet(os.path.join("image", "meizi"), 300, 500, auto_scale=True)
+        pet = RickPet(os.path.join("../assets", "pet_img"), 300, 500, auto_scale=True)
         gui = PetGui(pet)
         gui = PetGui(pet)
         app.exit(app.exec_())

@@ -1,23 +1,31 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from entity import PetMeta
 
 
 # 基本宠物组件
 class PetWidget(QWidget):
-    def __init__(self, init_pet_img="../img/hamster_pet.png"):
+    def __init__(self, pet_meta: PetMeta):
         super().__init__()
-        self.init_pet_img = init_pet_img
-
+        self.pet_meta = pet_meta
+        self.init_pet_img = pet_meta.source_path
+        self.setWindowTitle(pet_meta.name)
+        q_icon = QIcon(pet_meta.source_path)
+        self.setWindowIcon(q_icon)
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.min_size = QSize(60, 60)
-        self.max_size = QSize(200, 200)
+
+        pet_img = QPixmap(self.init_pet_img)
+        _pet_img_size = pet_img.scaledToWidth(100).size()
+
+        self.min_size = _pet_img_size / 2
+        self.max_size = _pet_img_size * 3
         self.label = QLabel(self)
-        self.label.setPixmap(QPixmap(self.init_pet_img))
+        self.label.setPixmap(pet_img)
         self.label.setScaledContents(True)
-        self.label.resize(100, 200)
-        self.resize(100, 200)
+        self.label.resize(_pet_img_size)
+        self.resize(_pet_img_size)
 
         # 初始化样式和功能
         # self._init_style()
@@ -95,9 +103,17 @@ class PetWidget(QWidget):
         if file_name:
             self.label.setPixmap(QPixmap(file_name))
 
+    def enterEvent(self, event):
+        print("进入")
+
+    def leaveEvent(self, event):
+        print("离开")
+
+    # 鼠标点击事件
     def mousePressEvent(self, event):
         self.offset = event.pos()
 
+    # 鼠标移动事件
     def mouseMoveEvent(self, event):
         x = event.globalX()
         y = event.globalY()
@@ -105,6 +121,7 @@ class PetWidget(QWidget):
         y_w = self.offset.y()
         self.move(x - x_w, y - y_w)
 
+    # 鼠标滚动事件
     def wheelEvent(self, event):
         if event.angleDelta().y() > 0:
             new_size = self.label.size() + QSize(10, 10)
